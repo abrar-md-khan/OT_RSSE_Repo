@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- iHub Connector Runtime component build file -->
+<project default="dist" basedir=".">
+    <property file="build.properties"/>
+    <!--    Default target  -->
+    <target name="dist" description="Creates a CAP package and cleans the temporary files.">
+		<antcall target="zip"/>
+        <antcall target="clean"/>
+    </target>
+    <!--    Target for cleaning temporary build folders -->
+    <target name="clean" unless="skip.clean" description="Deleting build folders">
+        <!--<delete file="${component.dir}/axis2.zip"/>-->  
+        <delete includeemptydirs="true" dir="${rsse.build.dir}"/>        
+        <delete file="${component.dir}/axis2/WEB-INF/services/ProcessSuiteRSSE.aar"/>
+    </target>
+    <!-- Calling build.xml from PSP RSSE folder -->
+    <target name="buildRSSE" depends="clean" description="Pack RSSE">
+        <ant antfile="${src.rsse.dir}/build.xml" useNativeBasedir="true" inheritAll="false"/>
+        <copy file="${rsse.build.dir}/ProcessSuiteRSSE.aar" todir="${src.axis.services.dir}"/>
+    </target>
+    <!-- Copying And Creating axis2 Zip File -->
+    <target name="zip" depends="buildRSSE" description="Building the iHub RSSE plugin">
+        <zip destfile="${component.dir}/axis2.zip" basedir="${component.dir}/axis2"/>
+    </target>
+</project>

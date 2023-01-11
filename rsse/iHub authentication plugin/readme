@@ -1,0 +1,53 @@
+-- Overview --
+
+Through an RSSE driver, the iHub server can delegate user and identity management through the OpenText Directory Services (OTDS) and process Suite based on the parameters we pass.  The users, groups, and associated organization dynamics maintained in OTDS\process Suite are available through standard LDAP endpoints or at an application level through an REST API URL endpoint.
+
+This RSSE driver is a base implementation of the RSSE API working against OTDS and Process Suite through its REST API endpoints.  The driver is deployed as a J2EE web application using the Apache Axis 2 web service APIs.  The HTTP based REST API calls are made using Apache HTTP Client 4 libraries.  For authentication, user/password and User/extended credentials  is handled.
+
+-- Requirements --
+
+* OTDS Server
+* Process Suite Server
+* iHub Server
+
+Note: As Mentioned in this RSSE, both the authentication types (user/password and User/extended credentials) are handled, we use OTDS for Authentication when we pass user/password & we use Process Suite for Authentication when we pass user/extended credentials. How Ever we can also use this RSSE when we integrate Process Suite with OTDS and then with iHub with the help of this RSSE
+
+-- Configuration --
+
+Parameters
+
+The parameters used by this RSSE driver are found under <iHub Installation directory>\modules\BIRTiHub\iHub\web\webapps\axis2\WEB-INF\services\RSSEDriver.properties.
+
+OTDS_BASE_URL - The URL of the base REST API endpoint for OTDS, e.g. http://otds.server/otdsws/v1
+
+OTDS_QUERY_USER - A general user in the OTDS system that can make queries to lookup other objects, such as getting a list of users, groups, or similar information. This user must have enough privileges to successfully complete the operations that are performed within the RSSE driver, dependent on the individual implementation.
+
+OTDS_QUERY_PASS - The query user's password
+
+IHUB_HOME_FOLDER - The base location for all user home folders. Each user found by RSSE will have a subfolder under this base (current implementation is to use username i.e. /home/bob@opentext.com)
+
+PLATFORM_BASE_URL= The URL of the process Suite, e.g. http://<Process Suite host name>:<port number>/Home
+
+-- Deploying --
+The RSSE driver uses the Apache Axis 2 libraries and is implemented as an Axis 2 web service, therefore it can be deployed on any web application server that already has Axis 2 deployed.  These instructions cover the deployment to the iHub embedded Tomcat.
+
+1. Obtain axis2.zip file from Process Platform Installation directory [<Cordys_Home>/components/ihubconnector/ihub/axis2.zip] and unzip to <iHub Installation directory>\modules\BIRTiHub\iHub\web\webapps creating its own web application folder.
+2. Configure the processsSuite RSSE driver as needed by modifying the RSSEDriver.properties(<iHub Installation directory>\modules\BIRTiHub\iHub\web\webapps\axis2\WEB-INF\services) values.
+3. Login to System Console
+4. Go to the Cluster Configuration page of the cluster containing this iHub instance and restart the Web service to fully deploy Axis 2 and the RSSE driver
+5a. Verify this was successfully deployed by going to http://localhost:8700/axis2/services/listServices.  The ProcessSuiteRSSE service should be listed on this page.
+6. Go to the User Management page, change the Select User Management field to RSSE SOAP Service 
+7. Apply these settings:
+
+Search Cache Only=unchecked
+Server Name=localhost
+Port Number=8700
+Context Path=/axis2/services/ProcessSuiteRSSE
+Cache Timeout=1440
+
+9. Restart iHub service for these settings to take effect. 
+
+Users will be able to login to iPortal with OTDS Credentials(as it requires User name and password).
+Users can Perform Operations through RESTful services of iHub when we pass request from Process Suite as it contains User name and SAML Token.
+
+When ever an user changes\modifies\reconfigure properties of RSSEProperties file,they need to restart iHub service and Cluster to take those changes effect.

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?><project name="PSP_RSSE" default="pack.all" basedir=".">
+    <property name="output" location="bin"/>
+    <property name="rsse.wsdl" location="wsdl/RSSE.wsdl"/>
+    <target name="get.params" description="Get input parameters">
+        <condition property="output" value="${var.output}">
+            <isset property="var.output"/>
+        </condition>
+    </target>
+    <target name="cleanup" depends="get.params" description="Cleanup">
+        <delete dir="${output}"/>
+        <delete dir="resources"/>
+    </target>
+    <target name="init" depends="cleanup" description="Common initialization">
+        <path id="path.libs">
+            <!-- to fix (only) the build for java 9. TODO: BOP-97101 -->
+            <fileset dir="../axis2/WEB-INF/lib">
+                <include name="activation*.jar"/>
+                <include name="geronimo-saaj*.jar"/>
+            </fileset>
+            <fileset dir="lib">
+                <include name="gson*.jar"/>
+                <include name="http*.jar"/>
+            </fileset>
+            <fileset dir="lib/axis2">
+                <include name="**/*.jar"/>
+            </fileset>
+        </path>
+        <mkdir dir="${output}"/>
+        <taskdef name="axis2-wsdl2java" classname="org.apache.axis2.tool.ant.AntCodegenTask" classpathref="path.libs"/>
+    </target>
+    <target name="build.all" depends="init" description="Build Axis2 proxy classes">
+        <javac debug="true" debuglevel="lines,source" includeantruntime="false" encoding="UTF8" srcdir="src" destdir="${output}" classpathref="path.libs"  source="1.8" target="1.8"/>
+        <!-- Copying the error messages file to the build out path-->
+        <copy todir="${output}" overwrite="true">
+            <fileset dir="src">
+                <include name="**/*.properties"/>
+            </fileset>
+        </copy>
+    </target>
+    <target name="pack.all" depends="build.all" description="Create a package for deployment">
+        <jar jarfile="${output}/ProcessSuiteRSSE.aar" basedir="${output}" includes="**"/>
+        <jar jarfile="${output}/ProcessSuiteRSSE.aar" basedir="src" update="true" includes="META-INF/**, *.*"/>
+        <jar jarfile="${output}/ProcessSuiteRSSE.aar" basedir="." update="true" includes="lib/*.jar"/>
+    </target>
+    <!-- This target is not called from anywhere. If there are any changes made to RSSE.wsdl, we need to manually run the target. -->
+    <target name="generate.wsdl.classes" description="Generate the classes from the RSSE.wsdl.">
+        <!-- Set serverSideInterface=true to recreate interface classes -->
+        <!-- Set generateServiceXml=true to recreate service XML file -->
+        <axis2-wsdl2java wsdlfilename="${rsse.wsdl}" output="${basedir}" testcase="no" unpackClasses="true" databindingName="adb" syncOnly="true" serverSide="true" serverSideInterface="false" generateServiceXml="true"/>
+        <!-- Remove auto-generated skeleton classes -->
+        <delete dir="src/com/actuate/schemas/actuate11/rsse/wsdl"/>
+    </target>
+</project>
