@@ -1,5 +1,4 @@
 <h1>Instructions for building the RSSE axis2 zip file using ant command</h1>
-***
 
 <h3>Prerequisites</h3> 
 
