@@ -10,6 +10,6 @@
 <h3>Getting Started</h3>
 
 <ul>
-<li>Open the command prompt and navigate to the location where the rsse source code Ex: C:\rsse> is present Ex: C:\rsse> and run the command ‘ant’.</li>
+<li>Open the command prompt and navigate to the location where the rsse source code is present. Ex: C:\rsse> and run the command ‘ant’.</li>
 <li>A zip file with name axis2 will be generated under rsse folder. Copy and paste the same zip file in iHub installation folder.</li>
 </ul>
